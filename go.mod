@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/secretmanager v1.14.2
 	github.com/dunglas/httpsfv v1.1.0
 	github.com/modelcontextprotocol/go-sdk v1.2.0
-	github.com/refraction-networking/utls v1.8.1
+	github.com/refraction-networking/utls v1.8.2
 	golang.org/x/mod v0.29.0
 	golang.org/x/net v0.47.0
 )
