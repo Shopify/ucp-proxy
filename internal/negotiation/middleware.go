@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -39,9 +40,9 @@ func Middleware(negotiator *Negotiator, logger *slog.Logger) func(http.Handler) 
 			// Parse profile URL from header
 			profileURL, err := ParseUCPAgentHeader(header)
 			if err != nil {
+				// Headers, profile URLs, and error text can contain credentials.
 				logger.Warn("invalid UCP-Agent header",
-					slog.String("header", header),
-					slog.String("error", err.Error()))
+					slog.String("error_type", fmt.Sprintf("%T", err)))
 				writeNegotiationError(w, http.StatusBadRequest, UCPAgentRequired,
 					"Invalid UCP-Agent header: "+err.Error())
 				return
@@ -59,8 +60,7 @@ func Middleware(negotiator *Negotiator, logger *slog.Logger) func(http.Handler) 
 
 				// Other negotiation errors
 				logger.Error("negotiation failed",
-					slog.String("profile_url", profileURL),
-					slog.String("error", err.Error()))
+					slog.String("error_type", fmt.Sprintf("%T", err)))
 				writeNegotiationError(w, http.StatusBadGateway, "negotiation_failed",
 					"Failed to negotiate with agent profile")
 				return
@@ -69,8 +69,7 @@ func Middleware(negotiator *Negotiator, logger *slog.Logger) func(http.Handler) 
 			// Log if using degraded mode (fetch failed but using fallback)
 			if ctx.FetchError != nil {
 				logger.Warn("using fallback profile due to fetch error",
-					slog.String("profile_url", profileURL),
-					slog.String("error", ctx.FetchError.Error()))
+					slog.String("error_type", fmt.Sprintf("%T", ctx.FetchError)))
 			}
 
 			// Store context for handlers
