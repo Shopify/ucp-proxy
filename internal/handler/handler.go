@@ -4,6 +4,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -57,7 +58,7 @@ func (h *Handler) writeJSON(w http.ResponseWriter, status int, data interface{})
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		h.logger.Error("failed to encode response", slog.String("error", err.Error()))
+		h.logger.Error("failed to encode response", slog.String("error_type", fmt.Sprintf("%T", err)))
 	}
 }
 
@@ -75,7 +76,7 @@ func (h *Handler) writeError(w http.ResponseWriter, err error) {
 			Message:    "an internal error occurred",
 			StatusCode: http.StatusInternalServerError,
 		}
-		h.logger.Error("internal error", slog.String("error", err.Error()))
+		h.logger.Error("internal error", slog.String("error_type", fmt.Sprintf("%T", err)))
 	}
 
 	h.writeJSON(w, apiErr.StatusCode, errorResponse{
@@ -114,7 +115,8 @@ func (h *Handler) writeCheckoutError(w http.ResponseWriter, checkoutID string, e
 			Message:    "an internal error occurred",
 			StatusCode: http.StatusInternalServerError,
 		}
-		h.logger.Error("internal error", slog.String("error", err.Error()))
+		// Error text can include checkout tokens, upstream URLs, or headers.
+		h.logger.Error("internal error", slog.String("error_type", fmt.Sprintf("%T", err)))
 	}
 
 	// Map HTTP status to UCP message severity

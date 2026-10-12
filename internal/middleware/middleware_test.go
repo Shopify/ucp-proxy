@@ -19,7 +19,7 @@ func TestLogging(t *testing.T) {
 		w.Write([]byte("created"))
 	}))
 
-	req := httptest.NewRequest("POST", "/checkouts", nil)
+	req := httptest.NewRequest("POST", "/checkout-sessions", nil)
 	req.Header.Set("User-Agent", "test-agent")
 	w := httptest.NewRecorder()
 
@@ -32,7 +32,7 @@ func TestLogging(t *testing.T) {
 	logged := buf.String()
 
 	// Verify log contains expected fields
-	checks := []string{"method=POST", "path=/checkouts", "status=201"}
+	checks := []string{"method=POST", "path=/checkout-sessions", "status=201"}
 	for _, check := range checks {
 		if !strings.Contains(logged, check) {
 			t.Errorf("Log missing %q: %s", check, logged)
@@ -84,8 +84,11 @@ func TestRecovery(t *testing.T) {
 	if !strings.Contains(logged, "panic recovered") {
 		t.Errorf("Log missing panic recovery: %s", logged)
 	}
-	if !strings.Contains(logged, "test panic") {
-		t.Errorf("Log missing panic message: %s", logged)
+	if !strings.Contains(logged, "error_type=string") || !strings.Contains(logged, "stack=") {
+		t.Errorf("Log missing panic type or stack: %s", logged)
+	}
+	if strings.Contains(logged, "test panic") {
+		t.Errorf("Log must not include the panic value: %s", logged)
 	}
 }
 

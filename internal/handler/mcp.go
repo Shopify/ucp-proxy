@@ -307,7 +307,7 @@ func (h *Handler) mcpError(err error) error {
 		return fmt.Errorf("%s: %s", apiErr.Code, apiErr.Message)
 	}
 	// Don't leak internal error details
-	h.logger.Error("mcp internal error", "error", err.Error())
+	h.logger.Error("mcp internal error", "error_type", fmt.Sprintf("%T", err))
 	return fmt.Errorf("internal error")
 }
 
@@ -341,8 +341,7 @@ func (h *Handler) mcpNegotiate(ctx context.Context, meta *MCPMeta) (*negotiation
 	// Log if using degraded mode (fetch failed but using fallback)
 	if negotiated.FetchError != nil {
 		h.logger.Warn("using fallback profile due to fetch error",
-			"profile_url", profileURL,
-			"error", negotiated.FetchError.Error())
+			"error_type", fmt.Sprintf("%T", negotiated.FetchError))
 	}
 
 	return negotiated, nil

@@ -25,6 +25,19 @@ go test ./internal/woocommerce/  # Specific package
 go test -v -run TestCartToUCP    # Specific test
 ```
 
+### Logging
+
+Checkout IDs contain bearer session tokens. Do not log them, request bodies,
+raw URLs or headers, or arbitrary error/panic values that may echo credentials.
+Request logs use fixed path labels (for example `/checkout-sessions/{id}`), with
+`[unmatched]` for unknown paths, including requests rejected before routing.
+When adding endpoints, extend the safe path labels in `internal/middleware`.
+
+Operation names, counts, method, status, duration, remote address, error types,
+and panic stack traces remain available for diagnostics. API responses and IDs
+are unchanged. Configure any ingress/access logs separately to avoid recording
+raw checkout URLs; application logging cannot redact another component's logs.
+
 ### Config File Structure
 
 ```json

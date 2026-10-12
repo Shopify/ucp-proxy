@@ -44,9 +44,8 @@ func (h *Handler) handleGetCheckout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.InfoContext(ctx, "getting checkout",
-		slog.String("checkout_id", checkoutID),
-	)
+	// Checkout IDs contain bearer tokens; log the operation, not the ID.
+	h.logger.InfoContext(ctx, "getting checkout")
 
 	checkout, err := h.adapter.GetCheckout(ctx, checkoutID)
 	if err != nil {
@@ -75,7 +74,6 @@ func (h *Handler) handleUpdateCheckout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.logger.InfoContext(ctx, "updating checkout",
-		slog.String("checkout_id", checkoutID),
 		slog.Int("line_items", len(req.LineItems)),
 		slog.Int("discount_codes", len(req.DiscountCodes)),
 		slog.Bool("has_shipping", req.ShippingAddress != nil),
@@ -121,8 +119,6 @@ func (h *Handler) handleCompleteCheckout(w http.ResponseWriter, r *http.Request)
 	}
 
 	h.logger.InfoContext(ctx, "completing checkout",
-		slog.String("checkout_id", checkoutID),
-		slog.String("instrument_id", selectedInstrument.ID),
 		slog.Int("instruments_count", len(req.Payment.Instruments)),
 	)
 
@@ -152,9 +148,7 @@ func (h *Handler) handleCancelCheckout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.InfoContext(ctx, "canceling checkout",
-		slog.String("checkout_id", checkoutID),
-	)
+	h.logger.InfoContext(ctx, "canceling checkout")
 
 	checkout, err := h.adapter.CancelCheckout(ctx, checkoutID)
 	if err != nil {
